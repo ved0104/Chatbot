@@ -1,16 +1,25 @@
-# Medical Q&A Chatbot
+# Medical Q&A Chatbot 🩺
 
-A medical question-answering system using the MedQuAD dataset with retrieval-based answering and basic entity recognition.
+A specialized medical question-answering system powered by the MedQuAD dataset with basic medical entity recognition capabilities.
+
+![Chatbot Demo](demo-screenshot.png) <!-- Add actual screenshot path -->
 
 ## Features
-- Medical question answering from MedQuAD dataset
-- TF-IDF based retrieval system
-- Basic medical entity recognition
-- Streamlit web interface
+- **Medical QA Retrieval**: Find answers from 47,000+ medical questions
+- **Entity Recognition**: Identify symptoms, diseases, and treatments
+- **Streamlit Interface**: User-friendly web interface
+- **TF-IDF Search**: Cosine similarity-based retrieval system
+- **Medical NER**: Enhanced with BC5CDR disease/chemical recognition
 
-## Setup Instructions
+## Prerequisites
+- Python 3.8+
+- Conda/Miniconda
+- 4GB+ free disk space
+- Git installed
 
-1. Clone the repository:
+## Installation
+
+### 1. Clone Repository
 ```bash
 git clone https://github.com/yourusername/medical-chatbot.git
 cd medical-chatbot
