@@ -23,13 +23,7 @@ An advanced chatbot for computer science research discussions, paper summarizati
 ```bash
 git clone https://github.com/yourusername/arxiv-chatbot.git
 cd arxiv-chatbot
-
-Here's your content converted **strictly to Markdown** for direct copy-pasting into a `README.md` file:
-
----
-
-# arxiv-chatbot
-
+```
 ## 2. Create Conda Environment
 
 ```bash
