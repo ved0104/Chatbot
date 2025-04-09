@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chatbot Analytics Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5; }
+        .dashboard-container { max-width: 1200px; margin: 0 auto; }
+        .chart-container { background: white; padding: 20px; margin-bottom: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
+        h1 { color: #2c3e50; text-align: center; margin-bottom: 40px; }
+        .metric-card { background: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .metric-value { font-size: 2.5em; color: #3498db; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <h1>📊 Chatbot Analytics Dashboard</h1>
+        
+        <div class="grid">
+            <div class="metric-card">
+                <h3>Total Queries</h3>
+                <div class="metric-value">{{ total_queries }}</div>
+            </div>
+            <div class="metric-card">
+                <h3>Average Rating</h3>
+                <div class="metric-value">{{ avg_rating }}/5</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h2>Query Topics Distribution</h2>
+            <canvas id="topicsChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <h2>Daily Query Volume</h2>
+            <canvas id="timeSeriesChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Topics Chart
+        const topicsData = {
+            labels: {{ topics_labels | safe }},
+            datasets: [{
+                data: {{ topics_values | safe }},
+                backgroundColor: ['#3498db', '#2ecc71', '#9b59b6', '#f1c40f', '#e74c3c']
+            }]
+        };
+
+        new Chart(document.getElementById('topicsChart'), {
+            type: 'pie',
+            data: topicsData,
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        // Time Series Chart
+        const timeSeriesData = {
+            labels: {{ time_labels | safe }},
+            datasets: [{
+                label: 'Queries per Day',
+                data: {{ time_values | safe }},
+                borderColor: '#3498db',
+                tension: 0.4,
+                fill: false
+            }]
+        };
+
+        new Chart(document.getElementById('timeSeriesChart'), {
+            type: 'line',
+            data: timeSeriesData,
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+        <!-- Add these sections to your dashboard -->
+<div class="chart-container">
+    <h2>Response Quality</h2>
+    <canvas id="qualityChart"></canvas>
+</div>
+
+<div class="chart-container">
+    <h2>Conversation Paths</h2>
+    <canvas id="flowChart"></canvas>
+</div>
+
+    // Add to existing chart setup
+    const qualityData = {
+        labels: ["Short (<50)", "Medium (50-150)", "Long (150+)"],
+        datasets: [{
+            data: {{ quality_stats }},
+            backgroundColor: ['#e74c3c', '#3498db', '#2ecc71']
+        }]
+    };
+
+    new Chart(document.getElementById('qualityChart'), {
+        type: 'bar',
+        data: qualityData,
+        options: { responsive: true }
+    });
+
+    const flowData = {
+        labels: {{ flow_labels }},
+        datasets: [{
+            data: {{ flow_values }},
+            borderColor: '#9b59b6'
+        }]
+    };
+
+    new Chart(document.getElementById('flowChart'), {
+        type: 'line',
+        data: flowData,
+        options: { responsive: true }
+    });
+    </script>
+</body>
+</html>
