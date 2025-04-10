@@ -1,6 +1,5 @@
 # AI Chatbot & Analytics Suite
 
-![Dashboard Demo](demo-screenshot.png)  
 *Comprehensive suite featuring an AI chatbot, analytics dashboard, and internship documentation*
 
 ## Overview
