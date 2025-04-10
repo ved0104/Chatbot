@@ -1,7 +1,5 @@
 # AI Chatbot with Analytics Dashboard
 
-![Chatbot Demo](demo-screenshot.png) *Example dashboard view*
-
 ## Description
 
 A smart AI chatbot powered by Google's Gemini API with integrated analytics capabilities. This solution provides:
