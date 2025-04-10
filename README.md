@@ -1,4 +1,3 @@
-```markdown
 # AI Chatbot & Analytics Suite
 
 ![Dashboard Demo](demo-screenshot.png)  
@@ -152,7 +151,7 @@ MIT License - See [LICENSE](LICENSE) for details
 [Chatbot Documentation](chatbot-core/README.md) | 
 [Report System Docs](internship-docs/README.md) | 
 [Shared Components](shared-resources/README.md)
-``` 
+
 
 This unified README:
 1. Clearly presents all components
