@@ -1,0 +1,4 @@
+question,expected_paper_ids
+"What are recent advances in transformer architectures?",["2112.11005","2106.04554","1810.04805"]
+"How does contrastive learning work in computer vision?",["2002.05709","2004.11362","2011.10566"]
+"What are new techniques for neural architecture search?",["1808.05377","2006.04647","2105.02737"]

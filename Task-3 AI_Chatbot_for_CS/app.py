@@ -1,3 +1,7 @@
+# Add to imports
+from sklearn.metrics import precision_score, recall_score, confusion_matrix
+import matplotlib.pyplot as plt
+import seaborn as sns
 import nltk
 import sys
 
@@ -164,7 +168,34 @@ def hybrid_search(query, _df, bm25, index, embedding_model, k=3, alpha=0.5):
     
     sorted_indices = [idx for _, idx in sorted(zip(combined_scores, combined_indices), reverse=True)]
     return _df.iloc[sorted_indices[:k]]
-
+# Add this function after the hybrid_search function
+def evaluate_model(df, bm25, index, embedding_model, eval_path='evaluation_questions.csv'):
+    eval_df = pd.read_csv(eval_path)
+    eval_df['expected_paper_ids'] = eval_df['expected_paper_ids'].apply(ast.literal_eval)
+    
+    y_true = []
+    y_pred = []
+    
+    for _, row in eval_df.iterrows():
+        # Get actual relevant papers
+        true_ids = set(row['expected_paper_ids'])
+        retrieved_papers = hybrid_search(row['question'], df, bm25, index, embedding_model, k=5)
+        retrieved_ids = set(retrieved_papers['id'].tolist())
+        
+        # Create binary relevance vectors
+        all_ids = list(true_ids.union(retrieved_ids))
+        true_vector = [1 if i in true_ids else 0 for i in all_ids]
+        pred_vector = [1 if i in retrieved_ids else 0 for i in all_ids]  # Fixed line
+        
+        y_true.extend(true_vector)
+        y_pred.extend(pred_vector)
+    
+    # Calculate metrics
+    precision = precision_score(y_true, y_pred)
+    recall = recall_score(y_true, y_pred)
+    conf_matrix = confusion_matrix(y_true, y_pred)
+    
+    return precision, recall, conf_matrix
 def generate_response(query, context_papers, generator):
     context = ""
     max_context_length = 2000
@@ -215,7 +246,30 @@ def main():
     # Sidebar
     st.sidebar.title("Navigation")
     menu_choice = st.sidebar.radio("Select Feature", ["Chat", "Paper Search", "Concept Analysis"])
-    
+    if st.sidebar.button('Run Evaluation'):
+        with st.spinner("Running comprehensive evaluation..."):
+            precision, recall, conf_matrix = evaluate_model(df, bm25, faiss_index, embedding_model)
+            
+            st.subheader("Model Performance Metrics")
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                st.metric("Precision", f"{precision:.2%}")
+                
+            with col2:
+                st.metric("Recall", f"{recall:.2%}")
+                
+            with col3:
+                st.metric("F1-Score", f"{2*(precision*recall)/(precision+recall):.2%}")
+            
+            st.subheader("Confusion Matrix")
+            fig, ax = plt.subplots()
+            sns.heatmap(conf_matrix, annot=True, fmt='d', ax=ax,
+                        xticklabels=['Irrelevant', 'Relevant'],
+                        yticklabels=['Irrelevant', 'Relevant'])
+            ax.set_xlabel('Predicted')
+            ax.set_ylabel('Actual')
+            st.pyplot(fig)
     # Main Content
     st.title("arXiv Computer Science Expert Chatbot")
     
@@ -301,6 +355,7 @@ def main():
                 st.bar_chart(word_counts)
             else:
                 st.warning("Concept not found in any paper abstracts.")
+
 
 if __name__ == "__main__":
     main()

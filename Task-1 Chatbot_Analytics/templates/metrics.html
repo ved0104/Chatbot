@@ -1,0 +1,47 @@
+<h1>Model Evaluation Metrics</h1>
+
+{% if warning %}
+  <p style="color: red;">{{ warning }}</p>
+{% endif %}
+
+{% if report %}
+  <h2>Precision, Recall, F1-Score</h2>
+  <table border="1">
+    <tr>
+      <th>Label</th>
+      <th>Precision</th>
+      <th>Recall</th>
+      <th>F1-Score</th>
+      <th>Support</th>
+    </tr>
+    {% for label, values in report.items() if label != 'accuracy' %}
+      <tr>
+        <td>{{ label }}</td>
+        <td>{{ values['precision']|round(2) }}</td>
+        <td>{{ values['recall']|round(2) }}</td>
+        <td>{{ values['f1-score']|round(2) }}</td>
+        <td>{{ values['support'] }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+{% endif %}
+
+{% if confusion and labels %}
+  <h2>Confusion Matrix</h2>
+  <table border="1">
+    <tr>
+      <th></th>
+      {% for label in labels %}
+        <th>{{ label }}</th>
+      {% endfor %}
+    </tr>
+    {% for row in confusion %}
+      <tr>
+        <th>{{ labels[loop.index0] }}</th>
+        {% for val in row %}
+          <td>{{ val }}</td>
+        {% endfor %}
+      </tr>
+    {% endfor %}
+  </table>
+{% endif %}

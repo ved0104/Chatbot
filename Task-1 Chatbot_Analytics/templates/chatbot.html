@@ -5,6 +5,12 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <nav>
+        <a href="/">Chatbot</a> |
+        <a href="/dashboard">Dashboard</a> |
+        <a href="/metrics">Metrics</a>
+      </nav>
+      
     <div class="chat-container">
         <h1>AI Assistant</h1>
         <div class="chat-box" id="chatbox"></div>
@@ -23,6 +29,40 @@
             </select>
             <button class="rating-btn" onclick="submitRating()">Submit</button>
         </div>
+        <form id="feedback-form">
+            <label for="actual_topic">Correct topic:</label>
+            <select id="actual_topic" name="actual_topic">
+              <option value="Technology">Technology</option>
+              <option value="Weather">Weather</option>
+              <option value="Casual">Casual</option>
+              <option value="Health">Health</option>
+              <option value="Academic">Academic</option>
+              <option value="General">General</option>
+            </select>
+            <input type="hidden" name="query_id" id="query_id">
+            <button type="submit">Submit</button>
+          </form>
+          <script>
+            document.getElementById('feedback-form').addEventListener('submit', function (e) {
+              e.preventDefault();
+              const actual_topic = document.getElementById('actual_topic').value;
+              const query_id = document.getElementById('query_id').value;
+          
+              fetch('/feedback/topic', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ actual_topic, query_id })
+              })
+              .then(res => res.json())
+              .then(data => {
+                alert('Thanks for your feedback!');
+              })
+              .catch(err => {
+                console.error('Feedback submission failed:', err);
+              });
+            });
+          </script>
+          
     </div>
 
     <script>
@@ -69,6 +109,7 @@
                 const data = await res.json();
                 appendMessage(data.response, 'bot');
                 lastQueryId = data.query_id;
+                document.getElementById('query_id').value = lastQueryId;
             } catch (error) {
                 console.error('Chat Error:', error);
                 appendMessage("Oops! Let's try that again. Could you please rephrase?", 'bot');

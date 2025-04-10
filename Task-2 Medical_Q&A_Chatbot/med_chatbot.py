@@ -1,4 +1,25 @@
+import nltk
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+import re
+from rank_bm25 import BM25Okapi
+nltk.download('stopwords')
+nltk.download('wordnet')
+
+stop_words = set(stopwords.words('english'))
+lemmatizer = WordNetLemmatizer()
+
+def preprocess(text):
+    if not isinstance(text, str):
+        return ''
+    text = text.lower()
+    text = re.sub(r'[^a-zA-Z]', ' ', text)
+    text = re.sub(r'\s+', ' ', text).strip()
+    words = text.split()
+    words = [lemmatizer.lemmatize(word) for word in words if word not in stop_words]
+    return ' '.join(words)
 import os
+import numpy as np
 import xml.etree.ElementTree as ET
 import pandas as pd
 import streamlit as st
@@ -39,7 +60,51 @@ def load_data():
                                     })
                 except Exception as e:
                     continue
-    return pd.DataFrame(qa_pairs)
+    df = pd.DataFrame(qa_pairs)
+    df['processed_question'] = df['question'].apply(preprocess)
+    return df
+def calculate_metrics(df):
+    test_fraction = 0.2
+    test_indices = df.sample(frac=test_fraction, random_state=42).index
+    answer_groups = df.groupby('answer').apply(lambda x: x.index.tolist())
+    
+    accuracy = 0.0
+    mrr = 0.0
+    total = len(test_indices)
+    
+    vectorizer = TfidfVectorizer()
+    X = vectorizer.fit_transform(df['processed_question'])
+
+    tokenized_corpus = [doc.split() for doc in df['processed_question']]
+    bm25 = BM25Okapi(tokenized_corpus)
+
+    for idx in test_indices:
+        test_question = df.loc[idx, 'question']
+        test_answer = df.loc[idx, 'answer']
+        
+        processed_test = preprocess(test_question)
+        tokenized_query = processed_test.split()
+        scores = bm25.get_scores(tokenized_query)
+        scores[idx] = -1  # Exclude current question
+        query_vec = vectorizer.transform([processed_test])
+        query_vec = vectorizer.transform([preprocess(test_question)])
+        similarities = cosine_similarity(query_vec, X)
+        similarities[0, idx] = -1
+        
+        most_similar_idx = similarities.argmax()
+        retrieved_answer = df.loc[most_similar_idx, 'answer']
+        
+        accuracy += 1 if retrieved_answer == test_answer else 0
+        
+        correct_indices = [i for i in answer_groups.get(test_answer, []) if i != idx]
+        if correct_indices:
+            sorted_indices = np.argsort(similarities[0])[::-1]
+            for rank, sorted_idx in enumerate(sorted_indices, 1):
+                if sorted_idx in correct_indices:
+                    mrr += 1.0 / rank
+                    break
+    
+    return accuracy/len(test_indices), mrr/len(test_indices)
 
 # Load medical NER model with error handling
 @st.cache_resource
@@ -82,7 +147,11 @@ def main():
     
     # Initialize components
     df, vectorizer, X, nlp = initialize_app()
-    
+    with st.sidebar:
+        st.header("Performance Metrics")
+        accuracy, mrr = calculate_metrics(df)
+        st.metric("Top-1 Accuracy", f"{accuracy:.2%}")
+        st.metric("Mean Reciprocal Rank", f"{mrr:.4f}")
     # User input
     user_question = st.text_input("Ask a medical question:")
     
@@ -92,8 +161,8 @@ def main():
             return
             
         try:
-            # Find similar questions
-            query_vec = vectorizer.transform([user_question])
+            processed_query = preprocess(user_question)
+            query_vec = vectorizer.transform([processed_query])
             similarities = cosine_similarity(query_vec, X)
             max_index = similarities.argmax()
             answer = df.iloc[max_index]['answer']

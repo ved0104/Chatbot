@@ -11,9 +11,16 @@
         h1 { color: #2c3e50; text-align: center; margin-bottom: 40px; }
         .metric-card { background: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .metric-value { font-size: 2.5em; color: #3498db; margin: 10px 0; }
+        .nav-bar { text-align: center; margin-bottom: 30px; }
+        .nav-button { background: #3498db; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; margin: 0 10px; }
+        canvas { max-height: 400px; margin: 20px 0; }
     </style>
 </head>
 <body>
+    <div class="nav-bar">
+        <a href="/" class="nav-button">Back to Chat</a>
+    </div>
+
     <div class="dashboard-container">
         <h1>📊 Chatbot Analytics Dashboard</h1>
         
@@ -37,6 +44,16 @@
             <h2>Daily Query Volume</h2>
             <canvas id="timeSeriesChart"></canvas>
         </div>
+
+        <div class="chart-container">
+            <h2>Response Length Distribution</h2>
+            <canvas id="qualityChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <h2>Popular Conversation Paths</h2>
+            <canvas id="flowChart"></canvas>
+        </div>
     </div>
 
     <script>
@@ -48,7 +65,6 @@
                 backgroundColor: ['#3498db', '#2ecc71', '#9b59b6', '#f1c40f', '#e74c3c']
             }]
         };
-
         new Chart(document.getElementById('topicsChart'), {
             type: 'pie',
             data: topicsData,
@@ -66,51 +82,39 @@
                 fill: false
             }]
         };
-
         new Chart(document.getElementById('timeSeriesChart'), {
             type: 'line',
             data: timeSeriesData,
             options: { responsive: true, maintainAspectRatio: false }
         });
-        <!-- Add these sections to your dashboard -->
-<div class="chart-container">
-    <h2>Response Quality</h2>
-    <canvas id="qualityChart"></canvas>
-</div>
 
-<div class="chart-container">
-    <h2>Conversation Paths</h2>
-    <canvas id="flowChart"></canvas>
-</div>
+        // Response Length Distribution Chart
+        new Chart(document.getElementById('qualityChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Short (<50)', 'Medium (50-150)', 'Long (150+)'],
+                datasets: [{
+                    label: 'Response Count',
+                    data: {{ quality_stats }},
+                    backgroundColor: ['#e74c3c', '#3498db', '#2ecc71']
+                }]
+            },
+            options: { responsive: true }
+        });
 
-    // Add to existing chart setup
-    const qualityData = {
-        labels: ["Short (<50)", "Medium (50-150)", "Long (150+)"],
-        datasets: [{
-            data: {{ quality_stats }},
-            backgroundColor: ['#e74c3c', '#3498db', '#2ecc71']
-        }]
-    };
-
-    new Chart(document.getElementById('qualityChart'), {
-        type: 'bar',
-        data: qualityData,
-        options: { responsive: true }
-    });
-
-    const flowData = {
-        labels: {{ flow_labels }},
-        datasets: [{
-            data: {{ flow_values }},
-            borderColor: '#9b59b6'
-        }]
-    };
-
-    new Chart(document.getElementById('flowChart'), {
-        type: 'line',
-        data: flowData,
-        options: { responsive: true }
-    });
+        // Popular Conversation Paths Chart
+        new Chart(document.getElementById('flowChart'), {
+            type: 'bar',
+            data: {
+                labels: {{ flow_labels | safe }},
+                datasets: [{
+                    label: 'Frequency',
+                    data: {{ flow_values | safe }},
+                    backgroundColor: '#9b59b6'
+                }]
+            },
+            options: { responsive: true }
+        });
     </script>
 </body>
 </html>
