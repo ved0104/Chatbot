@@ -2,8 +2,6 @@
 
 A specialized medical question-answering system powered by the MedQuAD dataset with basic medical entity recognition capabilities.
 
-![Chatbot Demo](demo-screenshot.png) <!-- Add actual screenshot path -->
-
 ## Features
 - **Medical QA Retrieval**: Find answers from 47,000+ medical questions
 - **Entity Recognition**: Identify symptoms, diseases, and treatments
