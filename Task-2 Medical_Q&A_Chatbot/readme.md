@@ -1,4 +1,3 @@
-```markdown
 # Medical Q&A Chatbot 🩺
 
 A specialized medical question-answering system powered by the MedQuAD dataset with basic medical entity recognition capabilities.
