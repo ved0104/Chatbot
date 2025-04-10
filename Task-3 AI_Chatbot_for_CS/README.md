@@ -206,7 +206,3 @@ MIT License - See `LICENSE`
 - Memory optimization parameters  
 - Dataset preprocessing requirements  
 - Research disclaimer for academic use  
-
----
-
-Let me know if you want badges, collapsible sections, or enhanced styling too!
